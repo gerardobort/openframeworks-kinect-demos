@@ -12,6 +12,8 @@ class ofApp : public ofBaseApp{
         void draw();
         void exit();
 
+	    void drawPointCloud();
+
         void keyPressed(int key);
         void keyReleased(int key);
         void mouseMoved(int x, int y );
@@ -25,8 +27,19 @@ class ofApp : public ofBaseApp{
         ofxKinect kinect;
 
 	    ofxCvGrayscaleImage depthImage; // grayscale depth image
+	    ofxCvGrayscaleImage depthThreshNear; // the near thresholded image
+	    ofxCvGrayscaleImage depthThreshFar; // the far thresholded image
 
-        int angle;
+        int kinectAnglePitch;
+        float cameraAnglePitch;
+        float cameraAngleYaw;
+        float cameraZoom;
+
+        int nearThreshold;
+        int farThreshold;
+
+        int lastMouseX;
+        int lastMouseY;
 
         // used for viewing the point cloud
         // ofEasyCam easyCam;

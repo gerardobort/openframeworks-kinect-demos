@@ -17,13 +17,18 @@ void ofApp::setup(){
     }
 
     depthImage.allocate(kinect.width, kinect.height);
+	depthThreshFar.allocate(kinect.width, kinect.height);
 
     ofSetFrameRate(60);
 
     // zero the tilt on startup
-    angle = 0;
-    kinect.setCameraTiltAngle(angle);
+    kinectAnglePitch = 0;
+    kinect.setCameraTiltAngle(kinectAnglePitch);
 
+	nearThreshold = 1200;
+	farThreshold = 450;
+
+    cameraZoom = 1000;
 }
 
 //--------------------------------------------------------------
@@ -35,20 +40,80 @@ void ofApp::update(){
 	// there is a new frame and we are connected
 	if(kinect.isFrameNew()) {
 
-		// load grayscale depth image from the kinect source
+		// load depthscale depth image from the kinect source
 		depthImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
-		depthImage.flagImageChanged();
 
+        //depthThreshNear = depthImage;
+        //depthThreshFar = depthImage;
+        //depthThreshNear.threshold(nearThreshold, true);
+        //depthThreshFar.threshold(farThreshold);
+        //cvAnd(depthThreshNear.getCvImage(), depthThreshFar.getCvImage(), depthImage.getCvImage(), NULL);
+
+        depthImage.flagImageChanged();
 	}
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-	ofSetColor(255, 255, 255);
+    ofEnableDepthTest();
 
-    depthImage.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
+    //depthImage.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
 
+    drawPointCloud();
+
+	ofSetColor(0, 255, 0);
+	stringstream reportStream;
+	reportStream
+        << "-----------------------------------" << endl
+        << "gerardobort@gmail.com - kinect demo" << endl
+        << "-----------------------------------" << endl
+        << "kinectAnglePitch " << kinectAnglePitch << endl
+        << "-----------------------------------" << endl
+        << "cameraZoom " << cameraZoom << endl
+        << "cameraAngleYaw " << cameraAngleYaw << endl
+        << "cameraAnglePitch " << cameraAnglePitch << endl
+        << "-----------------------------------" << endl
+        << "nearThreshold " << nearThreshold << endl
+        << "farThreshold " << farThreshold << endl
+        << "-----------------------------------" << endl;
+	ofDrawBitmapString(reportStream.str(), 20, 20);
+}
+
+//--------------------------------------------------------------
+void ofApp::drawPointCloud() {
+    int w = kinect.width;
+    int h = kinect.height;
+
+    ofMesh mesh;
+    ofColor colorA, colorB;
+    mesh.setMode(OF_PRIMITIVE_POINTS);
+    int step = 1;
+    for (int y = 0; y+step < h; y += step) {
+        for (int x = 0; x+step < w; x += step) {
+            if (kinect.getDistanceAt(x, y) > 0) {
+                float depth = kinect.getDistanceAt(x, y);
+                if (nearThreshold > depth && depth > farThreshold) {
+                    colorA = kinect.getColorAt(x,y);
+                    colorB = ofColor(0, colorB.getBrightness(), 0, 255);
+                    colorB.a = 255 - depth * (255.0 / nearThreshold);
+                    mesh.addColor(colorB);
+                    mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
+                }
+            }
+        }
+    }
+    glPointSize(2);
+    ofPushMatrix();
+    // the projected points are 'upside down' and 'backwards'
+    ofRotateX(cameraAnglePitch);
+    ofRotateY(cameraAngleYaw);
+    ofTranslate(ofGetWindowWidth()/2, ofGetWindowHeight()/2, cameraZoom); // center the points a bit
+    ofScale(1, 1, -1);
+    glEnable(GL_DEPTH_TEST);
+    mesh.drawVertices();
+    glDisable(GL_DEPTH_TEST);
+    ofPopMatrix();
 }
 
 //--------------------------------------------------------------
@@ -58,8 +123,8 @@ void ofApp::keyPressed(int key){
 			kinect.enableDepthNearValueWhite(!kinect.isDepthNearValueWhite());
 			break;
 
-		case 'o':
-			kinect.setCameraTiltAngle(angle); // go back to prev tilt
+		case 'e':
+			kinect.setCameraTiltAngle(kinectAnglePitch); // go back to prev tilt
 			kinect.open();
 			break;
 
@@ -93,15 +158,33 @@ void ofApp::keyPressed(int key){
 			break;
 
 		case OF_KEY_UP:
-			angle++;
-			if(angle>30) angle=30;
-			kinect.setCameraTiltAngle(angle);
+			kinectAnglePitch++;
+			if(kinectAnglePitch>30) kinectAnglePitch=30;
+			kinect.setCameraTiltAngle(kinectAnglePitch);
 			break;
 
 		case OF_KEY_DOWN:
-			angle--;
-			if(angle<-30) angle=-30;
-			kinect.setCameraTiltAngle(angle);
+			kinectAnglePitch--;
+			if(kinectAnglePitch<-30) kinectAnglePitch=-30;
+			kinect.setCameraTiltAngle(kinectAnglePitch);
+			break;
+
+		case OF_KEY_LEFT:
+			cameraZoom-=10;
+			break;
+
+		case OF_KEY_RIGHT:
+			cameraZoom+=10;
+			break;
+
+		case 'i':
+			nearThreshold-=10;
+            farThreshold-=10;
+			break;
+
+		case 'o':
+			nearThreshold+=10;
+            farThreshold+=10;
 			break;
 	}
 }
@@ -113,22 +196,24 @@ void ofApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
-
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-
+    cameraAngleYaw += (lastMouseX - x) * 0.5;
+    cameraAnglePitch += (lastMouseY - y) * 0.5;
+    lastMouseX = x;
+    lastMouseY = y;
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-
+    lastMouseX = x;
+    lastMouseY = y;
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-
 }
 
 //--------------------------------------------------------------
