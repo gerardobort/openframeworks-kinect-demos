@@ -29,6 +29,17 @@ void ofApp::setup(){
 	farThreshold = 450;
 
     cameraZoom = 1000;
+
+
+#ifdef TARGET_OPENGLES
+    shader.load("shadersES2/shader");
+#else
+    if(ofIsGLProgrammableRenderer()){
+        shader.load("shadersGL3/shader");
+    }else{
+        shader.load("shadersGL2/shader");
+    }
+#endif
 }
 
 //--------------------------------------------------------------
@@ -59,8 +70,9 @@ void ofApp::draw(){
     ofEnableDepthTest();
 
     //depthImage.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
-
+    shader.begin();
     drawPointCloud();
+    shader.end();
 
 	ofSetColor(0, 255, 0);
 	stringstream reportStream;

@@ -1,4 +1,5 @@
-bin
+bin/libs
+bin/kinect_*
 obj
 .*.swp
 .*.swo

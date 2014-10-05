@@ -43,4 +43,5 @@ class ofApp : public ofBaseApp{
 
         // used for viewing the point cloud
         // ofEasyCam easyCam;
+        ofShader shader;
 };
