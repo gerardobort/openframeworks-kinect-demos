@@ -34,7 +34,6 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
 
-	ofBackground(0, 0, 0);
 	kinect.update();
 
 	// there is a new frame and we are connected
@@ -55,6 +54,10 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+
+    ofColor centerColor(35, 28, 18);
+    ofColor edgeColor(0, 0, 0);
+    ofBackgroundGradient(centerColor, edgeColor, OF_GRADIENT_CIRCULAR);
 
     ofEnableDepthTest();
 
@@ -86,12 +89,15 @@ void ofApp::drawPointCloud() {
     int h = kinect.height;
 
     ofMesh mesh;
+    ofMesh mesh2;
     ofColor colorA, colorB;
-    mesh.setMode(OF_PRIMITIVE_POINTS);
-    int step = 1;
-    for (int y = 0; y+step < h; y += step) {
-        for (int x = 0; x+step < w; x += step) {
+    mesh.setMode(OF_PRIMITIVE_TRIANGLES);
+    mesh2.setMode(OF_PRIMITIVE_POINTS);
+    int step = 2;
+    for (int y = 0; y+2*step < h; y += step) {
+        for (int x = 0; x+2*step < w; x += step) {
             if (kinect.getDistanceAt(x, y) > 0) {
+                /*
                 float depth = kinect.getDistanceAt(x, y);
                 if (nearThreshold > depth && depth > farThreshold) {
                     colorA = kinect.getColorAt(x,y);
@@ -99,6 +105,47 @@ void ofApp::drawPointCloud() {
                     colorB.a = 255 - depth * (255.0 / nearThreshold);
                     mesh.addColor(colorB);
                     mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
+                }
+                */
+
+                ofVec3f v1 = kinect.getWorldCoordinateAt(x, y);
+                ofVec3f v2 = kinect.getWorldCoordinateAt(x+step, y);
+                ofVec3f v3 = kinect.getWorldCoordinateAt(x, y+step);
+                ofVec3f v4 = kinect.getWorldCoordinateAt(x+step, y+step);
+
+                ofColor c1 = kinect.getColorAt(x, y);
+                ofColor c2 = kinect.getColorAt(x+step, y);
+                ofColor c3 = kinect.getColorAt(x, y+step);
+                ofColor c4 = kinect.getColorAt(x+step, y+step);
+
+                ofColor c1g(0, 255, 0, 255 - v1.z * (255.0 / nearThreshold));
+                ofColor c2g(0, 255, 0, 255 - v2.z * (255.0 / nearThreshold));
+                ofColor c3g(0, 255, 0, 255 - v3.z * (255.0 / nearThreshold));
+                ofColor c4g(0, 255, 0, 255 - v4.z * (255.0 / nearThreshold));
+
+                if (nearThreshold > v1.z && v1.z > farThreshold) {
+                    if (v1.distance(v2) > 10*step) continue;
+                    if (v1.distance(v3) > 10*step) continue;
+                    mesh.addColor(c1g);
+                    mesh.addVertex(v1);
+                    mesh.addColor(c2g);
+                    mesh.addVertex(v2);
+                    mesh.addColor(c3g);
+                    mesh.addVertex(v3);
+                    mesh2.addColor(c1g);
+                    mesh2.addVertex(v1);
+                }
+                if (nearThreshold > v4.z && v4.z > farThreshold) {
+                    if (v4.distance(v2) > 10*step) continue;
+                    if (v4.distance(v3) > 10*step) continue;
+                    mesh.addColor(c2g);
+                    mesh.addVertex(v2);
+                    mesh.addColor(c3g);
+                    mesh.addVertex(v3);
+                    mesh.addColor(c4g);
+                    mesh.addVertex(v4);
+                    mesh2.addColor(c1g);
+                    mesh2.addVertex(v1);
                 }
             }
         }
@@ -111,7 +158,8 @@ void ofApp::drawPointCloud() {
     ofTranslate(ofGetWindowWidth()/2, ofGetWindowHeight()/2, cameraZoom); // center the points a bit
     ofScale(1, 1, -1);
     glEnable(GL_DEPTH_TEST);
-    mesh.drawVertices();
+    mesh.drawWireframe();
+    mesh2.drawVertices();
     glDisable(GL_DEPTH_TEST);
     ofPopMatrix();
 }
