@@ -7,6 +7,6 @@
 int main() {
     ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
 	ofAppGlutWindow window;
-	ofSetupOpenGL(&window, ofGetWindowWidth(), ofGetWindowHeight(), OF_WINDOW);
+	ofSetupOpenGL(&window, 1024, 768, OF_WINDOW);
 	ofRunApp(new ofApp());
 }

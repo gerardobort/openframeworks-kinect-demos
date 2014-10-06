@@ -102,7 +102,7 @@ void ofApp::drawPointCloud() {
         shader.setUniform1f("time", ofGetElapsedTimef());
         ofMesh mesh;
         mesh.setMode(OF_PRIMITIVE_TRIANGLES);
-        int step = 4;
+        int step = 2;
         for (int y = 0; y+2*step < h; y += step) {
             for (int x = 0; x+2*step < w; x += step) {
                 if (kinect.getDistanceAt(x, y) > 0) {
@@ -147,7 +147,7 @@ void ofApp::drawPointCloud() {
         ofTranslate(ofGetWindowWidth()/2, ofGetWindowHeight()/2, cameraZoom); // center the points a bit
         ofScale(1, 1, -1);
         glEnable(GL_DEPTH_TEST);
-        mesh.drawFaces();
+        mesh.drawWireframe();
         glDisable(GL_DEPTH_TEST);
         ofPopMatrix();
     shader.end();
