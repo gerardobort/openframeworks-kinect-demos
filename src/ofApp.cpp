@@ -70,16 +70,14 @@ void ofApp::draw(){
     ofEnableDepthTest();
 
     //depthImage.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
-    shader.begin();
     drawPointCloud();
-    shader.end();
 
 	ofSetColor(0, 255, 0);
 	stringstream reportStream;
 	reportStream
-        << "-----------------------------------" << endl
-        << "gerardobort@gmail.com - kinect demo" << endl
-        << "-----------------------------------" << endl
+        << "-----------------------------------------------" << endl
+        << "gerardobort@gmail.com - kinect demo - " << ofGetElapsedTimef() << endl
+        << "-----------------------------------------------" << endl
         << "kinectAnglePitch " << kinectAnglePitch << endl
         << "-----------------------------------" << endl
         << "cameraZoom " << cameraZoom << endl
@@ -97,35 +95,62 @@ void ofApp::drawPointCloud() {
     int w = kinect.width;
     int h = kinect.height;
 
-    ofMesh mesh;
-    ofColor colorA, colorB;
-    mesh.setMode(OF_PRIMITIVE_POINTS);
-    int step = 1;
-    for (int y = 0; y+step < h; y += step) {
-        for (int x = 0; x+step < w; x += step) {
-            if (kinect.getDistanceAt(x, y) > 0) {
-                float depth = kinect.getDistanceAt(x, y);
-                if (nearThreshold > depth && depth > farThreshold) {
-                    colorA = kinect.getColorAt(x,y);
-                    colorB = ofColor(0, colorB.getBrightness(), 0, 255);
-                    colorB.a = 255 - depth * (255.0 / nearThreshold);
-                    mesh.addColor(colorB);
-                    mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
+    shader.begin();
+        shader.setUniform1i("worldWidth", ofGetWindowWidth());
+        shader.setUniform1i("worldHeight", ofGetWindowHeight());
+        shader.setUniform1i("nearThreshold", nearThreshold);
+        shader.setUniform1f("time", ofGetElapsedTimef());
+        ofMesh mesh;
+        mesh.setMode(OF_PRIMITIVE_TRIANGLES);
+        int step = 4;
+        for (int y = 0; y+2*step < h; y += step) {
+            for (int x = 0; x+2*step < w; x += step) {
+                if (kinect.getDistanceAt(x, y) > 0) {
+                    ofVec3f v1 = kinect.getWorldCoordinateAt(x, y);
+                    ofVec3f v2 = kinect.getWorldCoordinateAt(x+step, y);
+                    ofVec3f v3 = kinect.getWorldCoordinateAt(x, y+step);
+                    ofVec3f v4 = kinect.getWorldCoordinateAt(x+step, y+step);
+
+                    ofColor c1 = kinect.getColorAt(x, y);
+                    ofColor c2 = kinect.getColorAt(x+step, y);
+                    ofColor c3 = kinect.getColorAt(x, y+step);
+                    ofColor c4 = kinect.getColorAt(x+step, y+step);
+
+                    if (nearThreshold > v1.z && v1.z > farThreshold) {
+                        if (v1.distance(v2) > 10*step) continue;
+                        if (v1.distance(v3) > 10*step) continue;
+                        mesh.addColor(c1);
+                        mesh.addVertex(v1);
+                        mesh.addColor(c2);
+                        mesh.addVertex(v2);
+                        mesh.addColor(c3);
+                        mesh.addVertex(v3);
+                    }
+                    if (nearThreshold > v4.z && v4.z > farThreshold) {
+                        if (v4.distance(v2) > 10*step) continue;
+                        if (v4.distance(v3) > 10*step) continue;
+                        mesh.addColor(c2);
+                        mesh.addVertex(v2);
+                        mesh.addColor(c3);
+                        mesh.addVertex(v3);
+                        mesh.addColor(c4);
+                        mesh.addVertex(v4);
+                    }
                 }
             }
         }
-    }
-    glPointSize(2);
-    ofPushMatrix();
-    // the projected points are 'upside down' and 'backwards'
-    ofRotateX(cameraAnglePitch);
-    ofRotateY(cameraAngleYaw);
-    ofTranslate(ofGetWindowWidth()/2, ofGetWindowHeight()/2, cameraZoom); // center the points a bit
-    ofScale(1, 1, -1);
-    glEnable(GL_DEPTH_TEST);
-    mesh.drawVertices();
-    glDisable(GL_DEPTH_TEST);
-    ofPopMatrix();
+        glPointSize(2);
+        ofPushMatrix();
+        // the projected points are 'upside down' and 'backwards'
+        ofRotateX(cameraAnglePitch);
+        ofRotateY(cameraAngleYaw);
+        ofTranslate(ofGetWindowWidth()/2, ofGetWindowHeight()/2, cameraZoom); // center the points a bit
+        ofScale(1, 1, -1);
+        glEnable(GL_DEPTH_TEST);
+        mesh.drawFaces();
+        glDisable(GL_DEPTH_TEST);
+        ofPopMatrix();
+    shader.end();
 }
 
 //--------------------------------------------------------------
