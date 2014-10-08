@@ -102,7 +102,7 @@ void ofApp::drawPointCloud() {
         shader.setUniform1f("time", ofGetElapsedTimef());
         ofMesh mesh;
         mesh.setMode(OF_PRIMITIVE_TRIANGLES);
-        int step = 2;
+        int step = 6;
         for (int y = 0; y+2*step < h; y += step) {
             for (int x = 0; x+2*step < w; x += step) {
                 if (kinect.getDistanceAt(x, y) > 0) {
