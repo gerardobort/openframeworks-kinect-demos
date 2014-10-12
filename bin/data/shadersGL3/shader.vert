@@ -5,7 +5,7 @@ attribute vec4 position;
 attribute vec4 color;
 varying vec4 pcolor;
 
-uniform int nearThreshold;
+uniform int farThreshold;
 uniform float time;
  
 void main(){
@@ -13,7 +13,7 @@ void main(){
     pos.z *= 1.0 + 0.2*(0.5 + 0.5*sin(time));
 
     vec4 col = color;
-    col.w = clamp(1.0 - (position.z/nearThreshold)*(position.z/nearThreshold), 0.0, 1.0);
+    col.w = clamp(1.0 - 0.2*(position.z/farThreshold)*(position.z/farThreshold), 0.0, 1.0);
 
     gl_Position = modelViewProjectionMatrix * pos;
     pcolor = col;

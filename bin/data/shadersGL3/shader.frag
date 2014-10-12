@@ -5,7 +5,7 @@
 
 uniform int worldWidth;
 uniform int worldHeight;
-uniform int nearThreshold;
+uniform int farThreshold;
 uniform float time;
 varying vec4 pcolor;
  

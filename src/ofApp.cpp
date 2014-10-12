@@ -25,8 +25,8 @@ void ofApp::setup(){
     kinectAnglePitch = 0;
     kinect.setCameraTiltAngle(kinectAnglePitch);
 
-	nearThreshold = 1200;
-	farThreshold = 450;
+	nearThreshold = 850;
+	farThreshold = 1800;
 
     cameraZoom = 1000;
 
@@ -56,8 +56,8 @@ void ofApp::update(){
 
         //depthThreshNear = depthImage;
         //depthThreshFar = depthImage;
-        //depthThreshNear.threshold(nearThreshold, true);
-        //depthThreshFar.threshold(farThreshold);
+        //depthThreshNear.threshold(farThreshold, true);
+        //depthThreshFar.threshold(nearThreshold);
         //cvAnd(depthThreshNear.getCvImage(), depthThreshFar.getCvImage(), depthImage.getCvImage(), NULL);
 
         depthImage.flagImageChanged();
@@ -84,8 +84,8 @@ void ofApp::draw(){
         << "cameraAngleYaw " << cameraAngleYaw << endl
         << "cameraAnglePitch " << cameraAnglePitch << endl
         << "-----------------------------------" << endl
-        << "nearThreshold " << nearThreshold << endl
         << "farThreshold " << farThreshold << endl
+        << "nearThreshold " << nearThreshold << endl
         << "-----------------------------------" << endl;
 	ofDrawBitmapString(reportStream.str(), 20, 20);
 }
@@ -98,7 +98,7 @@ void ofApp::drawPointCloud() {
     shader.begin();
         shader.setUniform1i("worldWidth", ofGetWindowWidth());
         shader.setUniform1i("worldHeight", ofGetWindowHeight());
-        shader.setUniform1i("nearThreshold", nearThreshold);
+        shader.setUniform1i("farThreshold", farThreshold);
         shader.setUniform1f("time", ofGetElapsedTimef());
         ofMesh mesh;
         mesh.setMode(OF_PRIMITIVE_TRIANGLES);
@@ -116,7 +116,7 @@ void ofApp::drawPointCloud() {
                     ofColor c3 = kinect.getColorAt(x, y+step);
                     ofColor c4 = kinect.getColorAt(x+step, y+step);
 
-                    if (nearThreshold > v1.z && v1.z > farThreshold) {
+                    if (farThreshold > v1.z && v1.z > nearThreshold) {
                         if (v1.distance(v2) > 10*step) continue;
                         if (v1.distance(v3) > 10*step) continue;
                         mesh.addColor(c1);
@@ -126,7 +126,7 @@ void ofApp::drawPointCloud() {
                         mesh.addColor(c3);
                         mesh.addVertex(v3);
                     }
-                    if (nearThreshold > v4.z && v4.z > farThreshold) {
+                    if (farThreshold > v4.z && v4.z > nearThreshold) {
                         if (v4.distance(v2) > 10*step) continue;
                         if (v4.distance(v3) > 10*step) continue;
                         mesh.addColor(c2);
@@ -147,7 +147,7 @@ void ofApp::drawPointCloud() {
         ofTranslate(ofGetWindowWidth()/2, ofGetWindowHeight()/2, cameraZoom); // center the points a bit
         ofScale(1, 1, -1);
         glEnable(GL_DEPTH_TEST);
-        mesh.drawWireframe();
+        mesh.drawFaces();
         glDisable(GL_DEPTH_TEST);
         ofPopMatrix();
     shader.end();
@@ -215,13 +215,13 @@ void ofApp::keyPressed(int key){
 			break;
 
 		case 'i':
-			nearThreshold-=10;
-            farThreshold-=10;
+			farThreshold-=10;
+            nearThreshold-=10;
 			break;
 
 		case 'o':
-			nearThreshold+=10;
-            farThreshold+=10;
+			farThreshold+=10;
+            nearThreshold+=10;
 			break;
 	}
 }
