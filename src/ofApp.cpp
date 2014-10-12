@@ -72,6 +72,7 @@ void ofApp::draw(){
     //depthImage.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
     drawPointCloud();
 
+    /*
 	ofSetColor(0, 255, 0);
 	stringstream reportStream;
 	reportStream
@@ -88,6 +89,7 @@ void ofApp::draw(){
         << "nearThreshold " << nearThreshold << endl
         << "-----------------------------------" << endl;
 	ofDrawBitmapString(reportStream.str(), 20, 20);
+    */
 }
 
 //--------------------------------------------------------------
@@ -96,61 +98,62 @@ void ofApp::drawPointCloud() {
     int h = kinect.height;
 
     shader.begin();
-        shader.setUniform1i("u_worldWidth", ofGetWindowWidth());
-        shader.setUniform1i("u_worldHeight", ofGetWindowHeight());
-        shader.setUniform1i("u_farThreshold", farThreshold);
-        shader.setUniform1f("u_time", ofGetElapsedTimef());
-        ofMesh mesh;
-        mesh.setMode(OF_PRIMITIVE_TRIANGLES);
-        int step = 6;
-        for (int y = 0; y+2*step < h; y += step) {
-            for (int x = 0; x+2*step < w; x += step) {
-                if (kinect.getDistanceAt(x, y) > 0) {
-                    ofVec3f v1 = kinect.getWorldCoordinateAt(x, y);
-                    ofVec3f v2 = kinect.getWorldCoordinateAt(x+step, y);
-                    ofVec3f v3 = kinect.getWorldCoordinateAt(x, y+step);
-                    ofVec3f v4 = kinect.getWorldCoordinateAt(x+step, y+step);
+    shader.setUniform1i("u_worldWidth", ofGetWindowWidth());
+    shader.setUniform1i("u_worldHeight", ofGetWindowHeight());
+    shader.setUniform1i("u_farThreshold", farThreshold);
+    shader.setUniform1f("u_time", ofGetElapsedTimef());
+    shader.end();
 
-                    ofColor c1 = kinect.getColorAt(x, y);
-                    ofColor c2 = kinect.getColorAt(x+step, y);
-                    ofColor c3 = kinect.getColorAt(x, y+step);
-                    ofColor c4 = kinect.getColorAt(x+step, y+step);
+    ofMesh mesh;
+    mesh.setMode(OF_PRIMITIVE_TRIANGLES);
+    int step = 6;
+    for (int y = 0; y+2*step < h; y += step) {
+        for (int x = 0; x+2*step < w; x += step) {
+            if (kinect.getDistanceAt(x, y) > 0) {
+                ofVec3f v1 = kinect.getWorldCoordinateAt(x, y);
+                ofVec3f v2 = kinect.getWorldCoordinateAt(x+step, y);
+                ofVec3f v3 = kinect.getWorldCoordinateAt(x, y+step);
+                ofVec3f v4 = kinect.getWorldCoordinateAt(x+step, y+step);
 
-                    if (farThreshold > v1.z && v1.z > nearThreshold) {
-                        if (v1.distance(v2) > 10*step) continue;
-                        if (v1.distance(v3) > 10*step) continue;
-                        mesh.addColor(c1);
-                        mesh.addVertex(v1);
-                        mesh.addColor(c2);
-                        mesh.addVertex(v2);
-                        mesh.addColor(c3);
-                        mesh.addVertex(v3);
-                    }
-                    if (farThreshold > v4.z && v4.z > nearThreshold) {
-                        if (v4.distance(v2) > 10*step) continue;
-                        if (v4.distance(v3) > 10*step) continue;
-                        mesh.addColor(c2);
-                        mesh.addVertex(v2);
-                        mesh.addColor(c3);
-                        mesh.addVertex(v3);
-                        mesh.addColor(c4);
-                        mesh.addVertex(v4);
-                    }
+                ofColor c1 = kinect.getColorAt(x, y);
+                ofColor c2 = kinect.getColorAt(x+step, y);
+                ofColor c3 = kinect.getColorAt(x, y+step);
+                ofColor c4 = kinect.getColorAt(x+step, y+step);
+
+                if (farThreshold > v1.z && v1.z > nearThreshold) {
+                    if (v1.distance(v2) > 10*step) continue;
+                    if (v1.distance(v3) > 10*step) continue;
+                    mesh.addColor(c1);
+                    mesh.addVertex(v1);
+                    mesh.addColor(c2);
+                    mesh.addVertex(v2);
+                    mesh.addColor(c3);
+                    mesh.addVertex(v3);
+                }
+                if (farThreshold > v4.z && v4.z > nearThreshold) {
+                    if (v4.distance(v2) > 10*step) continue;
+                    if (v4.distance(v3) > 10*step) continue;
+                    mesh.addColor(c2);
+                    mesh.addVertex(v2);
+                    mesh.addColor(c3);
+                    mesh.addVertex(v3);
+                    mesh.addColor(c4);
+                    mesh.addVertex(v4);
                 }
             }
         }
-        glPointSize(2);
-        ofPushMatrix();
-        // the projected points are 'upside down' and 'backwards'
-        ofRotateX(cameraAnglePitch);
-        ofRotateY(cameraAngleYaw);
-        ofTranslate(ofGetWindowWidth()/2, ofGetWindowHeight()/2, cameraZoom); // center the points a bit
-        ofScale(1, 1, -1);
-        glEnable(GL_DEPTH_TEST);
-        mesh.drawFaces();
-        glDisable(GL_DEPTH_TEST);
-        ofPopMatrix();
-    shader.end();
+    }
+    glPointSize(2);
+    ofPushMatrix();
+    // the projected points are 'upside down' and 'backwards'
+    ofRotateX(cameraAnglePitch);
+    ofRotateY(cameraAngleYaw);
+    ofTranslate(ofGetWindowWidth()/2, ofGetWindowHeight()/2, cameraZoom); // center the points a bit
+    ofScale(1, 1, -1);
+    glEnable(GL_DEPTH_TEST);
+    mesh.drawFaces();
+    glDisable(GL_DEPTH_TEST);
+    ofPopMatrix();
 }
 
 //--------------------------------------------------------------
