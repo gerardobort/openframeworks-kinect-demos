@@ -1,20 +1,21 @@
 #version 120
  
+attribute vec4 a_position;
+attribute vec4 a_color;
+
 uniform mat4 modelViewProjectionMatrix;
-attribute vec4 position;
-attribute vec4 color;
-varying vec4 pcolor;
-
-uniform int farThreshold;
-uniform float time;
+uniform int u_farThreshold;
+uniform float u_time;
  
-void main(){
-    vec4 pos = position;
-    pos.z *= 1.0 + 0.2*(0.5 + 0.5*sin(time));
+varying vec4 v_color;
 
-    vec4 col = color;
-    col.w = clamp(1.0 - 0.2*(position.z/farThreshold)*(position.z/farThreshold), 0.0, 1.0);
+void main(){
+    vec4 pos = a_position;
+    pos.z *= 1.0 + 0.2*(0.5 + 0.5*sin(u_time));
+
+    vec4 col = a_color;
+    col.w = clamp(1.0 - 0.2*(a_position.z/u_farThreshold)*(a_position.z/u_farThreshold), 0.0, 1.0);
 
     gl_Position = modelViewProjectionMatrix * pos;
-    pcolor = col;
+    v_color = col;
 }

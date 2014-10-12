@@ -96,10 +96,10 @@ void ofApp::drawPointCloud() {
     int h = kinect.height;
 
     shader.begin();
-        shader.setUniform1i("worldWidth", ofGetWindowWidth());
-        shader.setUniform1i("worldHeight", ofGetWindowHeight());
-        shader.setUniform1i("farThreshold", farThreshold);
-        shader.setUniform1f("time", ofGetElapsedTimef());
+        shader.setUniform1i("u_worldWidth", ofGetWindowWidth());
+        shader.setUniform1i("u_worldHeight", ofGetWindowHeight());
+        shader.setUniform1i("u_farThreshold", farThreshold);
+        shader.setUniform1f("u_time", ofGetElapsedTimef());
         ofMesh mesh;
         mesh.setMode(OF_PRIMITIVE_TRIANGLES);
         int step = 6;
