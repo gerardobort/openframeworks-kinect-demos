@@ -19,6 +19,10 @@ void main()
     float b = v_color.z * (0.5 + 0.5 *cos(u_time));
     float a = v_color.w;
 
-    vec4 mapColor = texture2DRect(u_sampler2d, v_texCoord0);
-    gl_FragColor = vec4(mapColor.rgb, a);
+    vec4 c31 = texture2DRect(u_sampler2d, v_texCoord0 + vec2( - 2.0, 0.0));
+    vec4 c32 = texture2DRect(u_sampler2d, v_texCoord0 + vec2( - 1.0, 0.0));
+    vec4 c33 = texture2DRect(u_sampler2d, v_texCoord0);
+    vec3 rgbColor = c33.rgb - 0.6*c32.rgb - 0.4*c31.rgb;
+    float len = clamp(length(rgbColor), 0.0, 1.0);
+    gl_FragColor = vec4(1.0-len, 1.0-len, 1.0-len, 1.0);
 }

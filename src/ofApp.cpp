@@ -45,7 +45,7 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
 
-	ofBackground(0, 0, 0);
+	ofBackground(255, 255, 255);
 	kinect.update();
 
 	// there is a new frame and we are connected
