@@ -42,6 +42,8 @@ class ofApp : public ofBaseApp{
         int lastMouseY;
 
         // used for viewing the point cloud
-        // ofEasyCam easyCam;
+        ofEasyCam easyCam;
         ofShader shader;
+
+        ofFbo fbo1;
 };
