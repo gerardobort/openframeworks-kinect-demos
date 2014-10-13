@@ -31,15 +31,9 @@ class ofApp : public ofBaseApp{
 	    ofxCvGrayscaleImage depthThreshFar; // the far thresholded image
 
         int kinectAnglePitch;
-        float cameraAnglePitch;
-        float cameraAngleYaw;
-        float cameraZoom;
 
         int nearThreshold;
         int farThreshold;
-
-        int lastMouseX;
-        int lastMouseY;
 
         // used for viewing the point cloud
         ofEasyCam easyCam;

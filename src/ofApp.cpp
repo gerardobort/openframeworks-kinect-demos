@@ -16,9 +16,6 @@ void ofApp::setup(){
         ofLogNotice() << "zero plane dist: " << kinect.getZeroPlaneDistance() << "mm";
     }
 
-    depthImage.allocate(kinect.width, kinect.height);
-	depthThreshFar.allocate(kinect.width, kinect.height);
-
     ofSetFrameRate(60);
 
     // zero the tilt on startup
@@ -27,8 +24,6 @@ void ofApp::setup(){
 
 	nearThreshold = 850;
 	farThreshold = 1800;
-
-    cameraZoom = 1000;
 
 
 #ifdef TARGET_OPENGLES
@@ -45,22 +40,10 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
 
-	ofBackground(255, 255, 255);
+	ofBackground(0, 0, 0);
 	kinect.update();
 
-	// there is a new frame and we are connected
 	if(kinect.isFrameNew()) {
-
-		// load depthscale depth image from the kinect source
-		depthImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
-
-        //depthThreshNear = depthImage;
-        //depthThreshFar = depthImage;
-        //depthThreshNear.threshold(farThreshold, true);
-        //depthThreshFar.threshold(nearThreshold);
-        //cvAnd(depthThreshNear.getCvImage(), depthThreshFar.getCvImage(), depthImage.getCvImage(), NULL);
-
-        depthImage.flagImageChanged();
 	}
 }
 
@@ -69,7 +52,6 @@ void ofApp::draw(){
 
     ofEnableDepthTest();
 
-    //depthImage.draw(0, 0, ofGetWindowWidth(), ofGetWindowHeight());
     drawPointCloud();
 
     /*
@@ -109,7 +91,6 @@ void ofApp::drawPointCloud() {
     shader.setUniformTexture("u_sampler2d", kinect.getTextureReference(), kinect.getTextureReference().getTextureData().textureID);
     shader.end();
 
-    easyCam.begin();
     ofMesh mesh;
     mesh.setMode(OF_PRIMITIVE_TRIANGLES);
     int step = 8;
@@ -150,13 +131,26 @@ void ofApp::drawPointCloud() {
         }
     }
 
-    // the projected points are 'upside down' and 'backwards'
-    //ofRotateX(cameraAnglePitch);
-    //ofRotateY(cameraAngleYaw);
-    //ofTranslate(ofGetWindowWidth()/2, ofGetWindowHeight()/2, cameraZoom); // center the points a bit
+    ofMesh mesh2;
+    mesh2.setMode(OF_PRIMITIVE_POINTS);
+    step = 2;
+    for (int y = 0; y+2*step < h; y += step) {
+        for (int x = 0; x+2*step < w; x += step) {
+            if (kinect.getDistanceAt(x, y) > 0) {
+                ofVec3f v1 = kinect.getWorldCoordinateAt(x, y);
+                ofColor c1 = kinect.getColorAt(x, y);
+                mesh.addColor(c1);
+                mesh.addVertex(v1);
+            }
+        }
+    }
+
+    easyCam.begin();
     ofScale(1, -1, 1);
     mesh.drawFaces();
-    easyCam.setTarget(ofVec3f(0.0, 0.0, cameraZoom));
+    glPointSize(2);
+    mesh2.drawVertices();
+    easyCam.setTarget(ofVec3f(0.0, 0.0, 1000));
     easyCam.end();
 }
 
@@ -214,11 +208,11 @@ void ofApp::keyPressed(int key){
 			break;
 
 		case OF_KEY_LEFT:
-			cameraZoom-=10;
+            easyCam.setDistance(easyCam.getDistance() + 20);
 			break;
 
 		case OF_KEY_RIGHT:
-			cameraZoom+=10;
+            easyCam.setDistance(easyCam.getDistance() - 20);
 			break;
 
 		case 'i':
@@ -244,20 +238,10 @@ void ofApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-/*
-    cameraAngleYaw += (lastMouseX - x) * 0.5;
-    cameraAnglePitch += (lastMouseY - y) * 0.5;
-    lastMouseX = x;
-    lastMouseY = y;
-*/
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-/*
-    lastMouseX = x;
-    lastMouseY = y;
-*/
 }
 
 //--------------------------------------------------------------
