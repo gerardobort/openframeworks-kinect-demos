@@ -148,7 +148,7 @@ void ofApp::drawPointCloud() {
     easyCam.begin();
     ofScale(1, -1, 1);
     mesh.drawFaces();
-    glPointSize(2);
+    glPointSize(6);
     mesh2.drawVertices();
     easyCam.setTarget(ofVec3f(0.0, 0.0, 1000));
     easyCam.end();
