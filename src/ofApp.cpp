@@ -27,12 +27,12 @@ void ofApp::setup(){
 
 
 #ifdef TARGET_OPENGLES
-    shader.load("shadersES2/shader");
+    //shader.load("shadersES2/shader");
 #else
     if(ofIsGLProgrammableRenderer()){
         shader.load("shadersGL3/shader");
     }else{
-        shader.load("shadersGL2/shader");
+        //shader.load("shadersGL2/shader");
     }
 #endif
 
@@ -147,23 +147,18 @@ void ofApp::drawPointCloud() {
     shader.setUniform1f("u_time", ofGetElapsedTimef());
     shader.setUniformTexture("u_sampler2d", kinect.getTextureReference(), kinect.getTextureReference().getTextureData().textureID);
 
-    easyCam.begin();
-    ofScale(-1, -1, -1);
-    ofTranslate(0, 0, -1000);
+    ofScale(1, 1, -1);
+    ofTranslate(500, 500, -1000);
 
+    
     glPointSize(1);
     shader.setUniform1i("u_index", 1);
     mesh.drawFaces();
-    easyCam.end();
-
-    easyCam.begin();
-    ofScale(-1, -1, -1);
-    ofTranslate(0, 0, -1000);
-    glPointSize(6);
-    shader.setUniform1i("u_index", 2);
-    mesh2.drawVertices();
-    easyCam.end();
     shader.end();
+
+
+    glPointSize(6);
+    mesh2.drawVertices();
 }
 
 //--------------------------------------------------------------
