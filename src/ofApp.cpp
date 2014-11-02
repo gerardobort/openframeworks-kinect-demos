@@ -140,7 +140,7 @@ void ofApp::drawPointCloud() {
             shaderSpectralBody.setUniform1i("u_nearThreshold", nearThreshold);
             shaderSpectralBody.setUniform1f("u_time", ofGetElapsedTimef());
             shaderSpectralBody.setUniformTexture("u_sampler2d", kinect.getTextureReference(), kinect.getTextureReference().getTextureData().textureID);
-            glPointSize(2);
+            glPointSize(6);
             mesh2.drawVertices();
         shaderSpectralBody.end();
     easyCam.end();
