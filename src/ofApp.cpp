@@ -2,19 +2,11 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    ofSetLogLevel(OF_LOG_VERBOSE);
 
+    ofSetLogLevel(OF_LOG_VERBOSE);
     kinect.setRegistration(true);
     kinect.init();
-    kinect.open();        // opens first available kinect
-
-    // print the intrinsic IR sensor values
-    if(kinect.isConnected()) {
-        ofLogNotice() << "sensor-emitter dist: " << kinect.getSensorEmitterDistance() << "cm";
-        ofLogNotice() << "sensor-camera dist:  " << kinect.getSensorCameraDistance() << "cm";
-        ofLogNotice() << "zero plane pixel size: " << kinect.getZeroPlanePixelSize() << "mm";
-        ofLogNotice() << "zero plane dist: " << kinect.getZeroPlaneDistance() << "mm";
-    }
+    kinect.open();
 
     ofSetFrameRate(60);
 
@@ -25,19 +17,8 @@ void ofApp::setup(){
 	nearThreshold = 400;
 	farThreshold = 1000;
 
-#ifdef TARGET_OPENGLES
-    shader.load("shadersES2/shader");
-    ofLogNotice() << "loaded ES2";
-#else
-    if(ofIsGLProgrammableRenderer()){
-        shader.load("shadersGL3/shader");
-        ofLogNotice() << "loaded GL3";
-    }else{
-        shader.load("shadersGL2/shader");
-        ofLogNotice() << "loaded GL2";
-    }
-#endif
-    //std::exit(1);
+    shaderPlasma.load("gl3/plasma/shader");
+    shaderSpectralBody.load("gl3/spectralbody/shader");
 
     easyCam.setGlobalPosition(ofVec3f(0.0, 100.0, 1500));
     easyCam.setTarget(ofVec3f(0.0, 0.0, 0.0));
@@ -60,24 +41,16 @@ void ofApp::draw(){
 
     drawPointCloud();
 
-    /*
 	ofSetColor(0, 255, 0);
 	stringstream reportStream;
 	reportStream
         << "-----------------------------------------------" << endl
         << "gerardobort@gmail.com - kinect demo - " << ofGetElapsedTimef() << endl
         << "-----------------------------------------------" << endl
-        << "kinectAnglePitch " << kinectAnglePitch << endl
-        << "-----------------------------------" << endl
-        << "cameraZoom " << cameraZoom << endl
-        << "cameraAngleYaw " << cameraAngleYaw << endl
-        << "cameraAnglePitch " << cameraAnglePitch << endl
-        << "-----------------------------------" << endl
         << "farThreshold " << farThreshold << endl
         << "nearThreshold " << nearThreshold << endl
         << "-----------------------------------" << endl;
 	ofDrawBitmapString(reportStream.str(), 20, 20);
-    */
 }
 
 //--------------------------------------------------------------
@@ -87,7 +60,7 @@ void ofApp::drawPointCloud() {
 
     ofMesh mesh;
     mesh.setMode(OF_PRIMITIVE_TRIANGLES);
-    int step = 10;
+    int step = 2;
     for (int y = 0; y+2*step < h; y += step) {
         for (int x = 0; x+2*step < w; x += step) {
             if (kinect.getDistanceAt(x, y) > 0) {
@@ -127,46 +100,48 @@ void ofApp::drawPointCloud() {
 
     ofMesh mesh2;
     mesh2.setMode(OF_PRIMITIVE_POINTS);
-    step = 2;
+    step = 1;
     for (int y = 0; y+2*step < h; y += step) {
         for (int x = 0; x+2*step < w; x += step) {
             if (kinect.getDistanceAt(x, y) > 0) {
                 ofVec3f v1 = kinect.getWorldCoordinateAt(x, y);
                 ofColor c1 = kinect.getColorAt(x, y);
-                mesh2.addColor(c1);
-                mesh2.addVertex(v1);
+                if (farThreshold > v1.z && v1.z > nearThreshold) {
+                    mesh2.addColor(c1);
+                    mesh2.addVertex(v1);
+                }
             }
         }
     }
 
 
-
-    shader.begin();
-    shader.setUniform1i("u_worldWidth", ofGetWindowWidth());
-    shader.setUniform1i("u_worldHeight", ofGetWindowHeight());
-    shader.setUniform1i("u_mapWidth", kinect.width);
-    shader.setUniform1i("u_mapHeight", kinect.height);
-    shader.setUniform1i("u_farThreshold", farThreshold);
-    shader.setUniform1f("u_time", ofGetElapsedTimef());
-    shader.setUniformTexture("u_sampler2d", kinect.getTextureReference(), kinect.getTextureReference().getTextureData().textureID);
-
     easyCam.begin();
-    ofScale(-1, -1, -1);
-    ofTranslate(0, 0, -1000);
+        ofScale(-1, -1, -1);
+        ofTranslate(0, 0, -1000);
 
-    glPointSize(1);
-    shader.setUniform1i("u_index", 1);
-    mesh.drawFaces();
-    easyCam.end();
+        shaderPlasma.begin();
+            shaderPlasma.setUniform1i("u_worldWidth", ofGetWindowWidth());
+            shaderPlasma.setUniform1i("u_worldHeight", ofGetWindowHeight());
+            shaderPlasma.setUniform1i("u_mapWidth", kinect.width);
+            shaderPlasma.setUniform1i("u_mapHeight", kinect.height);
+            shaderPlasma.setUniform1i("u_farThreshold", farThreshold);
+            shaderPlasma.setUniform1f("u_time", ofGetElapsedTimef());
+            shaderPlasma.setUniformTexture("u_sampler2d", kinect.getTextureReference(), kinect.getTextureReference().getTextureData().textureID);
+            mesh.drawWireframe();
+        shaderPlasma.end();
 
-    easyCam.begin();
-    ofScale(-1, -1, -1);
-    ofTranslate(0, 0, -1000);
-    glPointSize(6);
-    shader.setUniform1i("u_index", 2);
-    mesh2.drawVertices();
+        shaderSpectralBody.begin();
+            shaderSpectralBody.setUniform1i("u_worldWidth", ofGetWindowWidth());
+            shaderSpectralBody.setUniform1i("u_worldHeight", ofGetWindowHeight());
+            shaderSpectralBody.setUniform1i("u_mapWidth", kinect.width);
+            shaderSpectralBody.setUniform1i("u_mapHeight", kinect.height);
+            shaderSpectralBody.setUniform1i("u_farThreshold", farThreshold);
+            shaderSpectralBody.setUniform1f("u_time", ofGetElapsedTimef());
+            shaderSpectralBody.setUniformTexture("u_sampler2d", kinect.getTextureReference(), kinect.getTextureReference().getTextureData().textureID);
+            glPointSize(2);
+            mesh2.drawVertices();
+        shaderSpectralBody.end();
     easyCam.end();
-    shader.end();
 }
 
 //--------------------------------------------------------------

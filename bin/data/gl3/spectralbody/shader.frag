@@ -18,11 +18,7 @@ void main()
     vec4 c31 = texture(u_sampler2d, v_texCoord0 + vec2( - 2.0, 0.0));
     vec4 c32 = texture(u_sampler2d, v_texCoord0 + vec2( - 1.0, 0.0));
     vec4 c33 = texture(u_sampler2d, v_texCoord0);
-    if (1 == u_index) {
-        outputColor = vec4(0.0, 0.0, c33.b + c33.g, 0.7);
-    } else if (2 == u_index) {
-        vec3 rgbColor = c33.rgb - 0.6*c32.rgb - 0.4*c31.rgb;
-        float len = clamp(length(rgbColor), 0.0, 1.0);
-        outputColor = vec4(0, 1.0, 0, 4.5*len);
-    }
+    vec3 rgbColor = c33.rgb - 0.6*c32.rgb - 0.4*c31.rgb;
+    float len = clamp(length(rgbColor), 0.0, 1.0);
+    outputColor = vec4(0, 1.0, 0, 5.5*len);
 }
