@@ -125,9 +125,10 @@ void ofApp::drawPointCloud() {
             shaderPlasma.setUniform1i("u_mapWidth", kinect.width);
             shaderPlasma.setUniform1i("u_mapHeight", kinect.height);
             shaderPlasma.setUniform1i("u_farThreshold", farThreshold);
+            shaderPlasma.setUniform1i("u_nearThreshold", nearThreshold);
             shaderPlasma.setUniform1f("u_time", ofGetElapsedTimef());
             shaderPlasma.setUniformTexture("u_sampler2d", kinect.getTextureReference(), kinect.getTextureReference().getTextureData().textureID);
-            mesh.drawWireframe();
+            mesh.drawFaces();
         shaderPlasma.end();
 
         shaderSpectralBody.begin();
@@ -136,6 +137,7 @@ void ofApp::drawPointCloud() {
             shaderSpectralBody.setUniform1i("u_mapWidth", kinect.width);
             shaderSpectralBody.setUniform1i("u_mapHeight", kinect.height);
             shaderSpectralBody.setUniform1i("u_farThreshold", farThreshold);
+            shaderSpectralBody.setUniform1i("u_nearThreshold", nearThreshold);
             shaderSpectralBody.setUniform1f("u_time", ofGetElapsedTimef());
             shaderSpectralBody.setUniformTexture("u_sampler2d", kinect.getTextureReference(), kinect.getTextureReference().getTextureData().textureID);
             glPointSize(2);
