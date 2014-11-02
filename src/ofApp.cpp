@@ -60,7 +60,7 @@ void ofApp::drawPointCloud() {
 
     ofMesh mesh;
     mesh.setMode(OF_PRIMITIVE_TRIANGLES);
-    int step = 2;
+    int step = 4;
     for (int y = 0; y+2*step < h; y += step) {
         for (int x = 0; x+2*step < w; x += step) {
             if (kinect.getDistanceAt(x, y) > 0) {
@@ -75,6 +75,9 @@ void ofApp::drawPointCloud() {
                 ofColor c4 = kinect.getColorAt(x+step, y+step);
 
                 if (farThreshold > v1.z && v1.z > nearThreshold) {
+                    //if (v1.distance(v2) > 10*step || v1.distance(v3) > 10*step) {
+                    //    v1.z = (v2.z + v3.z)/2;
+                    //}
                     if (v1.distance(v2) > 10*step) continue;
                     if (v1.distance(v3) > 10*step) continue;
                     mesh.addColor(c1);
@@ -85,6 +88,9 @@ void ofApp::drawPointCloud() {
                     mesh.addVertex(v3);
                 }
                 if (farThreshold > v4.z && v4.z > nearThreshold) {
+                    //if (v4.distance(v2) > 10*step || v4.distance(v3) > 10*step) {
+                    //    v4.z = (v2.z + v3.z)/2;
+                    //}
                     if (v4.distance(v2) > 10*step) continue;
                     if (v4.distance(v3) > 10*step) continue;
                     mesh.addColor(c2);
@@ -100,7 +106,7 @@ void ofApp::drawPointCloud() {
 
     ofMesh mesh2;
     mesh2.setMode(OF_PRIMITIVE_POINTS);
-    step = 1;
+    step = 2;
     for (int y = 0; y+2*step < h; y += step) {
         for (int x = 0; x+2*step < w; x += step) {
             if (kinect.getDistanceAt(x, y) > 0) {
@@ -119,18 +125,6 @@ void ofApp::drawPointCloud() {
         ofScale(-1, -1, -1);
         ofTranslate(0, 0, -1000);
 
-        shaderPlasma.begin();
-            shaderPlasma.setUniform1i("u_worldWidth", ofGetWindowWidth());
-            shaderPlasma.setUniform1i("u_worldHeight", ofGetWindowHeight());
-            shaderPlasma.setUniform1i("u_mapWidth", kinect.width);
-            shaderPlasma.setUniform1i("u_mapHeight", kinect.height);
-            shaderPlasma.setUniform1i("u_farThreshold", farThreshold);
-            shaderPlasma.setUniform1i("u_nearThreshold", nearThreshold);
-            shaderPlasma.setUniform1f("u_time", ofGetElapsedTimef());
-            shaderPlasma.setUniformTexture("u_sampler2d", kinect.getTextureReference(), kinect.getTextureReference().getTextureData().textureID);
-            mesh.drawFaces();
-        shaderPlasma.end();
-
         shaderSpectralBody.begin();
             shaderSpectralBody.setUniform1i("u_worldWidth", ofGetWindowWidth());
             shaderSpectralBody.setUniform1i("u_worldHeight", ofGetWindowHeight());
@@ -140,9 +134,21 @@ void ofApp::drawPointCloud() {
             shaderSpectralBody.setUniform1i("u_nearThreshold", nearThreshold);
             shaderSpectralBody.setUniform1f("u_time", ofGetElapsedTimef());
             shaderSpectralBody.setUniformTexture("u_sampler2d", kinect.getTextureReference(), kinect.getTextureReference().getTextureData().textureID);
-            glPointSize(6);
-            mesh2.drawVertices();
+            mesh.drawWireframe();
         shaderSpectralBody.end();
+
+        shaderPlasma.begin();
+            shaderPlasma.setUniform1i("u_worldWidth", ofGetWindowWidth());
+            shaderPlasma.setUniform1i("u_worldHeight", ofGetWindowHeight());
+            shaderPlasma.setUniform1i("u_mapWidth", kinect.width);
+            shaderPlasma.setUniform1i("u_mapHeight", kinect.height);
+            shaderPlasma.setUniform1i("u_farThreshold", farThreshold);
+            shaderPlasma.setUniform1i("u_nearThreshold", nearThreshold);
+            shaderPlasma.setUniform1f("u_time", ofGetElapsedTimef());
+            shaderPlasma.setUniformTexture("u_sampler2d", kinect.getTextureReference(), kinect.getTextureReference().getTextureData().textureID);
+            glPointSize(4);
+            mesh2.drawVertices();
+        shaderPlasma.end();
     easyCam.end();
 }
 
