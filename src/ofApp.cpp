@@ -25,16 +25,19 @@ void ofApp::setup(){
 	nearThreshold = 400;
 	farThreshold = 1000;
 
-
 #ifdef TARGET_OPENGLES
     shader.load("shadersES2/shader");
+    ofLogNotice() << "loaded ES2";
 #else
     if(ofIsGLProgrammableRenderer()){
         shader.load("shadersGL3/shader");
+        ofLogNotice() << "loaded GL3";
     }else{
         shader.load("shadersGL2/shader");
+        ofLogNotice() << "loaded GL2";
     }
 #endif
+    //std::exit(1);
 
     easyCam.setGlobalPosition(ofVec3f(0.0, 100.0, 1500));
     easyCam.setTarget(ofVec3f(0.0, 0.0, 0.0));

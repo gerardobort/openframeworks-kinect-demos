@@ -39,5 +39,5 @@ class ofApp : public ofBaseApp{
         ofEasyCam easyCam;
         ofShader shader;
 
-        ofFbo fbo1;
+        //ofFbo fbo1;
 };
