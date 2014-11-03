@@ -28,6 +28,6 @@ void main()
     vec3 rgbColor = c33.rgb - 0.6*c32.rgb - 0.4*c31.rgb;
     float len = clamp(length(rgbColor), 0.0, 1.0);
     //float alpha = clamp(0.5 + 0.5*sin(M_PI*u_time*1.8), 0.0, 1.0);
-    float alpha = clamp(0.5 + u_musicSpectrumBand3, 0.0, 1.0);
-    outputColor = vec4(10.0*u_musicSpectrumBand0, 10.0*u_musicSpectrumBand1, 10.0*u_musicSpectrumBand2, 5.5 * len * alpha);
+    float alpha = clamp(0.2 + u_musicSpectrumBand3, 0.0, 1.0);
+    outputColor = vec4(6.0*u_musicSpectrumBand0, 6.0*u_musicSpectrumBand1, 6.0*u_musicSpectrumBand2, 5.5 * len * alpha);
 }

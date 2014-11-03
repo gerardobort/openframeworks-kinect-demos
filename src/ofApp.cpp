@@ -28,6 +28,7 @@ void ofApp::setup(){
     music.setLoop(true);
     music.play();
     nBandsToGet = 8;
+    nHBandsToGetSide = 32;
 	ofBackground(255, 255, 255);
 }
 
@@ -38,6 +39,7 @@ void ofApp::update(){
 
     ofSoundUpdate();
     fft = ofSoundGetSpectrum(nBandsToGet);
+    hfft = ofSoundGetSpectrum(nHBandsToGetSide*nHBandsToGetSide);
 
 	if(kinect.isFrameNew()) {
 	}
@@ -141,6 +143,32 @@ void ofApp::drawPointCloud() {
         }
     }
 
+    ofMesh mesh3;
+    mesh3.setMode(OF_PRIMITIVE_TRIANGLES);
+    step = 1;
+    float sx = ofGetWindowWidth()/nHBandsToGetSide;
+    float sy = ofGetWindowHeight()/nHBandsToGetSide;
+    float intensity;
+    int mid = nHBandsToGetSide/2;
+    for (int y = 0; y < nHBandsToGetSide; y ++) {
+        for (int x = 0; x < nHBandsToGetSide; x ++) {
+            intensity = -hfft[y*nHBandsToGetSide + x];
+            ofColor c1 = ofColor(255*intensity, 255*intensity, 255*intensity, 255);
+            mesh3.addColor(c1);
+            mesh3.addColor(c1);
+            mesh3.addColor(c1);
+            mesh3.addVertex(ofVec3f((x+0 -mid)*sx, (y+0 -mid)*sy, farThreshold*intensity +farThreshold));
+            mesh3.addVertex(ofVec3f((x+1 -mid)*sx, (y+0 -mid)*sy, farThreshold*intensity +farThreshold));
+            mesh3.addVertex(ofVec3f((x+0 -mid)*sx, (y+1 -mid)*sy, farThreshold*intensity +farThreshold));
+            mesh3.addColor(c1);
+            mesh3.addColor(c1);
+            mesh3.addColor(c1);
+            mesh3.addVertex(ofVec3f((x+1 -mid)*sx, (y+0 -mid)*sy, farThreshold*intensity +farThreshold));
+            mesh3.addVertex(ofVec3f((x+0 -mid)*sx, (y+1 -mid)*sy, farThreshold*intensity +farThreshold));
+            mesh3.addVertex(ofVec3f((x+1 -mid)*sx, (y+1 -mid)*sy, farThreshold*intensity +farThreshold));
+        }
+    }
+
 
     easyCam.begin();
         ofScale(-1, -1, -1);
@@ -195,6 +223,7 @@ void ofApp::drawPointCloud() {
             shaderMassGlow.setUniform1f("u_musicSpectrumBand3", fft[3]);
             glPointSize(1);
             mesh2.drawVertices();
+            mesh3.drawFaces();
         shaderMassGlow.end();
 
 

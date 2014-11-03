@@ -24,6 +24,6 @@ void main()
 {
     vec4 color = texture(u_sampler2d, v_texCoord0);
     //float alpha = clamp(0.9 + 0.5*cos(M_PI*u_time*1.8), 0.0, 1.0);
-    float alpha = clamp(0.5 + 10.0 * u_musicSpectrumBand3, 0.0, 1.0);
+    float alpha = clamp(0.8 + 10.0 * u_musicSpectrumBand3, 0.0, 1.0);
     outputColor = vec4(color.rgb, alpha);
 }

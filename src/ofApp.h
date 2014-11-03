@@ -44,6 +44,8 @@ class ofApp : public ofBaseApp{
         ofSoundPlayer music;
         int nBandsToGet;
         float * fft;
+        int nHBandsToGetSide;
+        float * hfft;
 
         //ofFbo fbo1;
 };
