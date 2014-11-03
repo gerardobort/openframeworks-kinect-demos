@@ -19,6 +19,7 @@ void ofApp::setup(){
 
     shaderPlasma.load("gl3/plasma/shader");
     shaderSpectralBody.load("gl3/spectralbody/shader");
+    shaderMassGlow.load("gl3/massglow/shader");
 
     easyCam.setGlobalPosition(ofVec3f(0.0, 100.0, 1500));
     easyCam.setTarget(ofVec3f(0.0, 0.0, 0.0));
@@ -27,12 +28,12 @@ void ofApp::setup(){
     music.setLoop(true);
     music.play();
     nBandsToGet = 8;
+	ofBackground(255, 255, 255);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
 
-	ofBackground(0, 0, 0);
 	kinect.update();
 
     ofSoundUpdate();
@@ -44,6 +45,10 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
+
+    ofColor centerColor(100, 100, 100);
+    ofColor edgeColor(40, 40, 40);
+    ofBackgroundGradient(centerColor, edgeColor, OF_GRADIENT_CIRCULAR);
 
     ofEnableDepthTest();
 
@@ -173,6 +178,26 @@ void ofApp::drawPointCloud() {
             glPointSize(4);
             mesh2.drawVertices();
         shaderPlasma.end();
+
+
+        shaderMassGlow.begin();
+            shaderMassGlow.setUniform1i("u_worldWidth", ofGetWindowWidth());
+            shaderMassGlow.setUniform1i("u_worldHeight", ofGetWindowHeight());
+            shaderMassGlow.setUniform1i("u_mapWidth", kinect.width);
+            shaderMassGlow.setUniform1i("u_mapHeight", kinect.height);
+            shaderMassGlow.setUniform1i("u_farThreshold", farThreshold);
+            shaderMassGlow.setUniform1i("u_nearThreshold", nearThreshold);
+            shaderMassGlow.setUniform1f("u_time", ofGetElapsedTimef());
+            shaderMassGlow.setUniformTexture("u_sampler2d", kinect.getTextureReference(), kinect.getTextureReference().getTextureData().textureID);
+            shaderMassGlow.setUniform1f("u_musicSpectrumBand0", fft[0]);
+            shaderMassGlow.setUniform1f("u_musicSpectrumBand1", fft[1]);
+            shaderMassGlow.setUniform1f("u_musicSpectrumBand2", fft[2]);
+            shaderMassGlow.setUniform1f("u_musicSpectrumBand3", fft[3]);
+            glPointSize(1);
+            mesh2.drawVertices();
+        shaderMassGlow.end();
+
+
     easyCam.end();
 }
 

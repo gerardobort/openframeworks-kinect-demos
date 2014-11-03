@@ -39,6 +39,7 @@ class ofApp : public ofBaseApp{
         ofEasyCam easyCam;
         ofShader shaderPlasma;
         ofShader shaderSpectralBody;
+        ofShader shaderMassGlow;
 
         ofSoundPlayer music;
         int nBandsToGet;
