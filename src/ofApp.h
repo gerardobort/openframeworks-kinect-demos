@@ -40,5 +40,9 @@ class ofApp : public ofBaseApp{
         ofShader shaderPlasma;
         ofShader shaderSpectralBody;
 
+        ofSoundPlayer music;
+        int nBandsToGet;
+        float * fft;
+
         //ofFbo fbo1;
 };

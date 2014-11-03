@@ -22,6 +22,11 @@ void ofApp::setup(){
 
     easyCam.setGlobalPosition(ofVec3f(0.0, 100.0, 1500));
     easyCam.setTarget(ofVec3f(0.0, 0.0, 0.0));
+
+    music.loadSound("media/perfume-point.mp3");
+    music.setLoop(true);
+    music.play();
+    nBandsToGet = 8;
 }
 
 //--------------------------------------------------------------
@@ -29,6 +34,9 @@ void ofApp::update(){
 
 	ofBackground(0, 0, 0);
 	kinect.update();
+
+    ofSoundUpdate();
+    fft = ofSoundGetSpectrum(nBandsToGet);
 
 	if(kinect.isFrameNew()) {
 	}
@@ -49,6 +57,14 @@ void ofApp::draw(){
         << "-----------------------------------------------" << endl
         << "farThreshold " << farThreshold << endl
         << "nearThreshold " << nearThreshold << endl
+        << "spectrum [0 - 7]   " << fft[0] << endl
+        << "                   " << fft[1] << endl
+        << "                   " << fft[2] << endl
+        << "                   " << fft[3] << endl
+        << "                   " << fft[4] << endl
+        << "                   " << fft[5] << endl
+        << "                   " << fft[6] << endl
+        << "                   " << fft[7] << endl
         << "-----------------------------------" << endl;
 	ofDrawBitmapString(reportStream.str(), 20, 20);
 }
@@ -134,6 +150,10 @@ void ofApp::drawPointCloud() {
             shaderSpectralBody.setUniform1i("u_nearThreshold", nearThreshold);
             shaderSpectralBody.setUniform1f("u_time", ofGetElapsedTimef());
             shaderSpectralBody.setUniformTexture("u_sampler2d", kinect.getTextureReference(), kinect.getTextureReference().getTextureData().textureID);
+            shaderSpectralBody.setUniform1f("u_musicSpectrumBand0", fft[0]);
+            shaderSpectralBody.setUniform1f("u_musicSpectrumBand1", fft[1]);
+            shaderSpectralBody.setUniform1f("u_musicSpectrumBand2", fft[2]);
+            shaderSpectralBody.setUniform1f("u_musicSpectrumBand3", fft[3]);
             mesh.drawWireframe();
         shaderSpectralBody.end();
 
@@ -146,6 +166,10 @@ void ofApp::drawPointCloud() {
             shaderPlasma.setUniform1i("u_nearThreshold", nearThreshold);
             shaderPlasma.setUniform1f("u_time", ofGetElapsedTimef());
             shaderPlasma.setUniformTexture("u_sampler2d", kinect.getTextureReference(), kinect.getTextureReference().getTextureData().textureID);
+            shaderPlasma.setUniform1f("u_musicSpectrumBand0", fft[4]);
+            shaderPlasma.setUniform1f("u_musicSpectrumBand1", fft[5]);
+            shaderPlasma.setUniform1f("u_musicSpectrumBand2", fft[6]);
+            shaderPlasma.setUniform1f("u_musicSpectrumBand3", fft[7]);
             glPointSize(4);
             mesh2.drawVertices();
         shaderPlasma.end();
@@ -265,4 +289,5 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 void ofApp::exit() {
     kinect.setCameraTiltAngle(0); // zero the tilt on exit
     kinect.close();
+    music.unloadSound();
 }
