@@ -1,8 +1,6 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ofxOpenCv.h"
-#include "ofxKinect.h"
 
 class ofApp : public ofBaseApp{
 
@@ -23,29 +21,12 @@ class ofApp : public ofBaseApp{
         void windowResized(int w, int h);
         void dragEvent(ofDragInfo dragInfo);
         void gotMessage(ofMessage msg);
+        ofVec3f mapBands(int band, int totalBands, int scanline, int scanlines);
         
-        ofxKinect kinect;
-
-	    ofxCvGrayscaleImage depthImage; // grayscale depth image
-	    ofxCvGrayscaleImage depthThreshNear; // the near thresholded image
-	    ofxCvGrayscaleImage depthThreshFar; // the far thresholded image
-
-        int kinectAnglePitch;
-
-        int nearThreshold;
-        int farThreshold;
-
-        // used for viewing the point cloud
         ofEasyCam easyCam;
-        ofShader shaderPlasma;
-        ofShader shaderSpectralBody;
-        ofShader shaderMassGlow;
+        ofShader shader;
 
         ofSoundPlayer music;
         int nBandsToGet;
         float * fft;
-        int nHBandsToGetSide;
-        float * hfft;
-
-        //ofFbo fbo1;
 };
